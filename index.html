@@ -1,0 +1,892 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Shadowing mỗi ngày</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&family=Newsreader:opsz,wght@6..72,400;6..72,500&display=swap" rel="stylesheet">
+<style>
+:root{
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+  --bg:#E9EEF2; --surface:#F7F9FB; --ink:#16212B; --muted:#5B6874; --line:#CCD5DD;
+  --model:#2442C9; --model-soft:#DCE3FB; --you:#9B2C74; --you-soft:#F5DDEC;
+  --ok:#147A4B; --ok-soft:#D7F0E3; --miss:#B4361F; --miss-soft:#F8DDD6;
+  --sans:"Be Vietnam Pro",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  --serif:"Newsreader",Georgia,"Times New Roman",serif;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#0F151C; --surface:#18212B; --ink:#E6ECF2; --muted:#93A1AE; --line:#2B3744;
+    --model:#7F98FF; --model-soft:#1F2A55; --you:#E77DBE; --you-soft:#47213A;
+    --ok:#5DD39B; --ok-soft:#173A2A; --miss:#FF8C73; --miss-soft:#45231C;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0F151C; --surface:#18212B; --ink:#E6ECF2; --muted:#93A1AE; --line:#2B3744;
+  --model:#7F98FF; --model-soft:#1F2A55; --you:#E77DBE; --you-soft:#47213A;
+  --ok:#5DD39B; --ok-soft:#173A2A; --miss:#FF8C73; --miss-soft:#45231C;
+}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*,*::before,*::after{box-sizing:inherit}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:16px;line-height:1.5;-webkit-font-smoothing:antialiased}
+.wrap{max-width:640px;margin:0 auto;padding:20px 18px 48px}
+header.top{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;margin-bottom:18px}
+h1{font-size:1.65rem;line-height:1.15;margin:0;font-weight:800;letter-spacing:-.02em}
+h1 .echo{display:block;color:var(--model);opacity:.35;font-weight:700;margin-top:-.5em;transform:translateX(10px);pointer-events:none}
+.streak{text-align:right;font-size:.85rem;color:var(--muted)}
+.streak b{display:block;font-size:1.6rem;color:var(--ink);line-height:1}
+nav.tabs{display:flex;gap:4px;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:4px;margin-bottom:18px}
+nav.tabs button{flex:1;border:0;background:transparent;color:var(--muted);font:600 .92rem var(--sans);padding:9px 6px;border-radius:9px;cursor:pointer}
+nav.tabs button[aria-selected="true"]{background:var(--ink);color:var(--bg)}
+section[hidden]{display:none}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:18px}
+.panel + .panel{margin-top:14px}
+h2{font-size:1.15rem;margin:0 0 6px;font-weight:700}
+p{margin:0 0 10px}
+.muted{color:var(--muted)}
+.small{font-size:.86rem}
+.row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.btn{appearance:none;border:1.5px solid var(--ink);background:var(--ink);color:var(--bg);font:600 .95rem var(--sans);padding:11px 16px;border-radius:11px;cursor:pointer;min-height:44px}
+.btn.ghost{background:transparent;color:var(--ink)}
+.btn.model{background:var(--model);border-color:var(--model);color:#fff}
+.btn.you{background:var(--you);border-color:var(--you);color:#fff}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.btn:focus-visible,nav.tabs button:focus-visible,select:focus-visible,textarea:focus-visible,.chip:focus-visible{outline:3px solid var(--model);outline-offset:2px}
+.levels{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:12px 0}
+.chip{border:1.5px solid var(--line);background:transparent;color:var(--ink);border-radius:11px;padding:10px 8px;font:600 .9rem var(--sans);cursor:pointer;text-align:center}
+.chip small{display:block;font-weight:400;color:var(--muted);font-size:.75rem}
+.chip[aria-pressed="true"]{border-color:var(--model);background:var(--model-soft)}
+.plan{list-style:none;padding:0;margin:12px 0 16px;display:grid;gap:8px}
+.plan li{display:flex;gap:12px;align-items:baseline}
+.plan .n{flex:none;width:26px;height:26px;border-radius:50%;background:var(--model-soft);color:var(--model);display:grid;place-items:center;font-weight:700;font-size:.85rem}
+.progressbar{height:6px;background:var(--line);border-radius:6px;overflow:hidden;margin:4px 0 16px}
+.progressbar i{display:block;height:100%;background:var(--model);width:0;transition:width .3s}
+.stage{font-size:.85rem;color:var(--muted);display:flex;justify-content:space-between;gap:8px}
+.sentence{font-family:var(--serif);font-size:1.55rem;line-height:1.35;margin:10px 0 16px;letter-spacing:-.005em}
+.sentence .w{border-radius:4px;padding:0 2px;margin:0 -2px}
+.sentence .w.ok{background:var(--ok-soft);color:var(--ok)}
+.sentence .w.miss{background:var(--miss-soft);color:var(--miss);text-decoration:underline wavy;text-underline-offset:4px}
+.vi{font-size:.92rem;color:var(--muted);margin:-8px 0 14px}
+textarea{width:100%;min-height:84px;border:1.5px solid var(--line);border-radius:11px;background:var(--bg);color:var(--ink);font:1.05rem var(--serif);padding:10px 12px;resize:vertical}
+.heard{border-left:3px solid var(--you);padding:6px 0 6px 12px;margin:10px 0;font-family:var(--serif);font-size:1.05rem;color:var(--you)}
+.score{display:flex;align-items:baseline;gap:8px;margin:8px 0}
+.score b{font-size:2rem;line-height:1}
+.speed{display:inline-flex;border:1.5px solid var(--line);border-radius:11px;overflow:hidden}
+.speed button{border:0;background:transparent;color:var(--muted);font:600 .85rem var(--sans);padding:0 12px;min-height:44px;cursor:pointer}
+.speed button[aria-pressed="true"]{background:var(--model-soft);color:var(--model)}
+.rec{display:inline-block;width:10px;height:10px;border-radius:50%;background:var(--you);margin-right:6px;animation:pulse 1s infinite}
+@keyframes pulse{50%{opacity:.25}}
+@media (prefers-reduced-motion:reduce){.rec{animation:none}.progressbar i{transition:none}}
+.selfrate{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:8px}
+.result-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:12px 0}
+.metric{border:1px solid var(--line);border-radius:12px;padding:12px}
+.metric .v{font-size:1.9rem;font-weight:800;line-height:1.1}
+.metric .l{font-size:.85rem;color:var(--muted)}
+.metric .d{font-size:.82rem;font-weight:600}
+.up{color:var(--ok)} .down{color:var(--miss)}
+.chartbox{overflow-x:auto}
+svg text{font-family:var(--sans)}
+.legend{display:flex;gap:16px;font-size:.85rem;margin-top:6px}
+.legend span::before{content:"";display:inline-block;width:14px;height:3px;border-radius:2px;margin-right:6px;vertical-align:middle;background:currentColor}
+.words{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.words span{background:var(--miss-soft);color:var(--miss);border-radius:8px;padding:3px 9px;font-family:var(--serif);font-size:1rem}
+.words span small{font-family:var(--sans);opacity:.7;margin-left:4px}
+table{width:100%;border-collapse:collapse;font-size:.88rem}
+th,td{text-align:left;padding:7px 6px;border-bottom:1px solid var(--line)}
+th{color:var(--muted);font-weight:500}
+.tablebox{overflow-x:auto}
+.note{background:var(--model-soft);border-radius:12px;padding:12px 14px;font-size:.9rem;margin-top:12px}
+.guide h3{font-size:1rem;margin:16px 0 4px}
+.guide ol{padding-left:20px;margin:6px 0}
+.guide li{margin-bottom:6px}
+.err{color:var(--miss);font-size:.88rem;margin-top:8px}
+.cm-top{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:12px}
+.cm-dots{display:flex;gap:6px}
+.cm-dots i{flex:1;height:6px;border-radius:3px;background:var(--line)}
+.cm-dots i.done{background:var(--model)} .cm-dots i.cur{background:var(--you)}
+.cm-phase{font-size:1.9rem;font-weight:800;line-height:1.2;letter-spacing:-.01em;margin:22px 0 8px;min-height:2.4em}
+.cm-text{font-family:var(--serif);font-size:1.25rem;line-height:1.4;color:var(--muted);min-height:3.6em}
+.cm-live{color:var(--you);font-family:var(--serif);min-height:1.6em;margin-top:6px}
+.cm-ctrls{display:grid;grid-template-columns:1fr 1.35fr 1fr;gap:10px;margin-top:22px}
+.cm-ctrls .btn{min-height:104px;font-size:1.05rem;border-radius:20px}
+.opt{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:11px 0;border-bottom:1px solid var(--line)}
+.opt small{font-size:.8rem}
+.seg{display:inline-flex;flex:none;border:1.5px solid var(--line);border-radius:11px;overflow:hidden}
+.seg button{border:0;background:transparent;color:var(--muted);font:600 .88rem var(--sans);padding:0 14px;min-height:42px;cursor:pointer}
+.seg button[aria-pressed="true"]{background:var(--model-soft);color:var(--model)}
+.seg button:disabled{opacity:.4}
+.seg button:focus-visible{outline:3px solid var(--model);outline-offset:-3px}
+#pocket{position:fixed;inset:0;z-index:50;background:#000;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:22px;padding:env(safe-area-inset-top,0px) 24px env(safe-area-inset-bottom,0px);touch-action:none;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;-webkit-tap-highlight-color:transparent}
+#pocket[hidden]{display:none}
+#pkPhase{font:700 1.1rem var(--sans);color:#4d4d4d;text-align:center;min-height:1.5em}
+#pkRing{width:128px;height:128px;cursor:pointer}
+#pkRing circle{fill:none;stroke-width:5}
+.pk-hint{font:500 .85rem/1.5 var(--sans);color:#3d3d3d;text-align:center}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <h1>Shadowing<br>mỗi ngày<span class="echo" aria-hidden="true">mỗi ngày</span></h1>
+    <div class="streak"><b id="streakNum">0</b>ngày liên tiếp</div>
+  </header>
+
+  <nav class="tabs" role="tablist">
+    <button role="tab" aria-selected="true" data-tab="today">Hôm nay</button>
+    <button role="tab" aria-selected="false" data-tab="progress">Tiến bộ</button>
+    <button role="tab" aria-selected="false" data-tab="guide">Cách luyện</button>
+  </nav>
+
+  <!-- TODAY -->
+  <section id="tab-today">
+    <div id="startView" class="panel">
+      <h2 id="todayTitle">Bài hôm nay</h2>
+      <p class="muted small" id="todayMeta"></p>
+      <div class="levels" role="group" aria-label="Trình độ">
+        <button class="chip" data-level="A2">Cơ bản<small>A2</small></button>
+        <button class="chip" data-level="B1">Trung cấp<small>B1</small></button>
+        <button class="chip" data-level="B2">Nâng cao<small>B2</small></button>
+      </div>
+      <ul class="plan">
+        <li><span class="n">1</span><span><b>Nghe chép</b> — nghe 5 câu, gõ lại những gì nghe được. Chấm điểm nghe. <span class="muted small">~4 phút</span></span></li>
+        <li><span class="n">2</span><span><b>Shadowing</b> — nghe và nói đuổi theo giọng mẫu, rồi tự nói một lần để chấm phát âm. <span class="muted small">~8 phút</span></span></li>
+        <li><span class="n">3</span><span><b>Kết quả</b> — điểm nghe, điểm nói, từ hay sai, so với các buổi trước.</span></li>
+      </ul>
+      <div class="row">
+        <button class="btn model" id="startBtn">Bắt đầu buổi luyện</button>
+        <button class="btn ghost" id="genBtn" hidden>Bài mới do Claude soạn</button>
+      </div>
+      <div class="note" style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap">
+        <span><b>Đang đi đường?</b> Chế độ tai nghe: chỉ nghe và nói, điều khiển bằng nút tai nghe.</span>
+        <button class="btn you" id="cmBtn">Chế độ tai nghe</button>
+      </div>
+      <p class="err" id="startErr" hidden></p>
+      <p class="muted small" id="doneToday" hidden style="margin-top:12px">Bạn đã luyện hôm nay. Luyện thêm vẫn được ghi nhận.</p>
+    </div>
+
+    <div id="lessonView" hidden>
+      <div class="stage"><span id="stageName"></span><span id="stageCount"></span></div>
+      <div class="progressbar"><i id="bar"></i></div>
+      <div class="panel" id="lessonPanel"></div>
+    </div>
+
+    <div id="resultView" hidden></div>
+
+    <div id="commuteView" hidden>
+      <div class="panel" id="cmSetup">
+        <h2>Chế độ tai nghe</h2>
+        <p class="muted small">Không cần gõ, không cần nhìn màn hình. App đọc câu, chừa khoảng lặng để bạn nói theo, rồi nghe bạn nhắc lại để chấm điểm.</p>
+        <div class="opt"><span>Số lần nói đuổi mỗi câu</span><div class="seg" data-opt="repeats"><button data-v="2">2</button><button data-v="3">3</button></div></div>
+        <div class="opt"><span>Khoảng lặng để nhắc lại</span><div class="seg" data-opt="gap"><button data-v="1.3">Vừa</button><button data-v="1.8">Dài</button></div></div>
+        <div class="opt"><span>Đọc nghĩa tiếng Việt sau câu</span><div class="seg" data-opt="viMeaning"><button data-v="0">Tắt</button><button data-v="1">Bật</button></div></div>
+        <div class="opt"><span>Chấm điểm bằng micro<br><small class="muted" id="micNote">Tắt nếu đường quá ồn</small></span><div class="seg" data-opt="useMic"><button data-v="0">Tắt</button><button data-v="1">Bật</button></div></div>
+        <div class="note"><b>Nút tai nghe:</b> bấm 1 lần để tạm dừng hoặc tiếp tục, 2 lần để sang câu sau, 3 lần để nghe lại câu. Một tiếng "bíp" báo đến lượt bạn nói để chấm điểm.<br><br>Để âm lượng vừa đủ còn nghe tiếng xe, và đừng nhìn màn hình khi qua đường.</div>
+        <div class="row" style="margin-top:14px"><button class="btn you" id="cmGoPocket">Bắt đầu và bỏ túi</button><button class="btn model" id="cmGo">Bắt đầu nghe</button><button class="btn ghost" id="cmBack">Quay lại</button></div>
+      </div>
+      <div class="panel" id="cmPlayer" hidden>
+        <div class="cm-top"><span class="small muted" id="cmTitle"></span><div class="row"><button class="btn you" id="cmPocket" style="min-height:40px;padding:6px 14px">Bỏ túi</button><button class="btn ghost" id="cmExit" style="min-height:40px;padding:6px 14px">Thoát</button></div></div>
+        <div class="cm-dots" id="cmDots"></div>
+        <div class="cm-phase" id="cmPhase" aria-live="polite"></div>
+        <div class="cm-text" id="cmText"></div>
+        <div class="cm-live" id="cmLive"></div>
+        <div class="cm-ctrls">
+          <button class="btn ghost" id="cmRep">Nghe lại</button>
+          <button class="btn model" id="cmPlay">Tạm dừng</button>
+          <button class="btn ghost" id="cmNext">Câu sau</button>
+        </div>
+        <label class="row small muted" style="margin-top:16px;gap:8px"><input type="checkbox" id="cmShowText" checked> Hiện chữ câu đang luyện</label>
+      </div>
+      <div id="cmResult" hidden></div>
+    </div>
+  </section>
+
+  <!-- PROGRESS -->
+  <section id="tab-progress" hidden>
+    <div class="panel" id="progressPanel"></div>
+  </section>
+
+  <!-- GUIDE -->
+  <section id="tab-guide" hidden>
+    <div class="panel guide">
+      <h2>Shadowing là gì</h2>
+      <p>Bạn nghe một câu tiếng Anh và nói đuổi theo gần như cùng lúc, chậm hơn giọng mẫu chừng nửa giây — như một cái bóng. Cách này luyện cùng lúc tai (nhận âm, nối âm) và miệng (nhịp, ngữ điệu, trọng âm).</p>
+      <h3>Một buổi 10–15 phút</h3>
+      <ol>
+        <li>Nghe chép trước khi nhìn chữ: đây là bài kiểm tra nghe thật, đừng bật lại quá 3 lần.</li>
+        <li>Mỗi câu shadowing: nghe 1 lần, nói đuổi 2–3 lần (có thể dùng tốc độ 0.75×), rồi bấm chấm điểm và tự nói một mình.</li>
+        <li>Chú ý từ bị gạch đỏ: thường là âm cuối (-s, -ed, -t), nối âm hoặc trọng âm.</li>
+      </ol>
+      <h3>Điểm được tính thế nào</h3>
+      <p><b>Điểm nghe</b> = tỉ lệ từ bạn chép đúng và đúng thứ tự so với câu gốc.</p>
+      <p><b>Điểm nói</b> = tỉ lệ từ máy nhận dạng giọng nói nghe ra đúng khi bạn đọc một mình (lấy lần tốt nhất). Máy càng nghe ra đúng, phát âm càng rõ.</p>
+      <p><b>Tốc độ</b> = số từ/phút khi bạn nói. Người bản xứ nói tự nhiên khoảng 130–160 từ/phút.</p>
+      <p>Tab Tiến bộ so sánh trung bình 7 buổi gần nhất với 7 buổi trước đó. Khi điểm nói và nghe đều trên 85% trong 3 buổi liền, app gợi ý lên trình độ.</p>
+      <div class="note">Chấm điểm nói cần micro và nhận dạng giọng nói của trình duyệt — chạy tốt nhất trên Chrome (Android, máy tính) hoặc Safari (iPhone). Nếu không dùng được micro, app cho bạn tự chấm.</div>
+    </div>
+  </section>
+</div>
+
+<div id="pocket" hidden role="dialog" aria-label="Màn hình đã khóa cảm ứng">
+  <div id="pkPhase"></div>
+  <svg id="pkRing" viewBox="0 0 100 100" aria-label="Giữ để mở khóa"><circle cx="50" cy="50" r="45" stroke="#1c1c1c"/><circle id="pkArc" cx="50" cy="50" r="45" stroke="#707070" stroke-dasharray="282.74" stroke-dashoffset="282.74" stroke-linecap="round" transform="rotate(-90 50 50)"/><text x="50" y="55" text-anchor="middle" font-size="14" font-weight="600" fill="#4d4d4d">Giữ</text></svg>
+  <div class="pk-hint">Giữ vòng tròn 2 giây để mở khóa<br>Nút tai nghe vẫn hoạt động</div>
+</div>
+
+<script>
+/* ---------------- Content bank ---------------- */
+const BANK = {
+ A2:[
+  {topic:"Buổi sáng",s:[
+   ["I usually wake up at six thirty.","Tôi thường thức dậy lúc sáu rưỡi."],
+   ["I drink a glass of water first.","Tôi uống một ly nước trước tiên."],
+   ["Then I make coffee for my wife.","Sau đó tôi pha cà phê cho vợ."],
+   ["We eat breakfast together at home.","Chúng tôi ăn sáng cùng nhau ở nhà."],
+   ["I leave the house before eight.","Tôi ra khỏi nhà trước tám giờ."]]},
+  {topic:"Ở văn phòng",s:[
+   ["Good morning, how are you today?","Chào buổi sáng, hôm nay bạn thế nào?"],
+   ["Can you send me the file, please?","Bạn gửi tôi file được không?"],
+   ["I have a meeting at ten.","Tôi có cuộc họp lúc mười giờ."],
+   ["Let me check my email first.","Để tôi kiểm tra email trước."],
+   ["Thanks a lot for your help.","Cảm ơn bạn nhiều vì đã giúp."]]},
+  {topic:"Đi chợ",s:[
+   ["How much are these apples?","Mấy quả táo này bao nhiêu tiền?"],
+   ["I would like two kilos, please.","Cho tôi hai ký."],
+   ["Do you have any fresh fish?","Chị có cá tươi không?"],
+   ["That is a little too expensive.","Cái đó hơi đắt một chút."],
+   ["Can I pay by card here?","Tôi trả bằng thẻ ở đây được không?"]]},
+  {topic:"Gia đình",s:[
+   ["My family lives in a small town.","Gia đình tôi sống ở một thị trấn nhỏ."],
+   ["I have one brother and two sisters.","Tôi có một anh trai và hai chị gái."],
+   ["My mother is a very good cook.","Mẹ tôi nấu ăn rất ngon."],
+   ["We visit my parents every weekend.","Chúng tôi thăm bố mẹ mỗi cuối tuần."],
+   ["My father likes to watch football.","Bố tôi thích xem bóng đá."]]},
+  {topic:"Thời tiết",s:[
+   ["It is very hot outside today.","Hôm nay ngoài trời rất nóng."],
+   ["Don't forget to bring an umbrella.","Đừng quên mang theo ô."],
+   ["It might rain this afternoon.","Chiều nay có thể mưa."],
+   ["I love the cool weather in autumn.","Tôi thích thời tiết mát mẻ mùa thu."],
+   ["The sky is clear and blue.","Bầu trời trong và xanh."]]},
+  {topic:"Cuối tuần",s:[
+   ["What did you do last weekend?","Cuối tuần trước bạn làm gì?"],
+   ["I went to the cinema with friends.","Tôi đi xem phim với bạn bè."],
+   ["We had dinner at a nice restaurant.","Chúng tôi ăn tối ở một nhà hàng ngon."],
+   ["On Sunday I stayed at home.","Chủ nhật tôi ở nhà."],
+   ["I cleaned my room and read a book.","Tôi dọn phòng và đọc sách."]]}
+ ],
+ B1:[
+  {topic:"Hỗ trợ khách hàng",s:[
+   ["Thank you for contacting us, how can I help you?","Cảm ơn đã liên hệ, tôi có thể giúp gì cho bạn?"],
+   ["Could you tell me what error message you see?","Bạn cho tôi biết thông báo lỗi bạn thấy được không?"],
+   ["I'm going to check this with our technical team.","Tôi sẽ kiểm tra việc này với đội kỹ thuật."],
+   ["It should be fixed by the end of the day.","Lỗi sẽ được sửa trước cuối ngày."],
+   ["Please let me know if the problem happens again.","Vui lòng báo tôi nếu lỗi xảy ra lần nữa."]]},
+  {topic:"Họp nhóm",s:[
+   ["Let's start the meeting, everyone is here now.","Bắt đầu họp thôi, mọi người đã đủ rồi."],
+   ["First, I'd like to review last week's tasks.","Đầu tiên tôi muốn xem lại việc tuần trước."],
+   ["We finished most of them on time.","Chúng ta đã xong phần lớn đúng hạn."],
+   ["There are still two reports we need to update.","Vẫn còn hai báo cáo cần cập nhật."],
+   ["Does anyone have questions before we finish?","Có ai có câu hỏi trước khi kết thúc không?"]]},
+  {topic:"Du lịch",s:[
+   ["I'm planning a short trip to the beach next month.","Tôi định đi biển một chuyến ngắn tháng sau."],
+   ["We booked a hotel that is close to the sea.","Chúng tôi đặt khách sạn gần biển."],
+   ["The flight takes about one hour and a half.","Chuyến bay mất khoảng một tiếng rưỡi."],
+   ["I want to try the local seafood there.","Tôi muốn thử hải sản địa phương ở đó."],
+   ["Could you recommend a good place to visit?","Bạn giới thiệu một nơi đáng đi được không?"]]},
+  {topic:"Sức khỏe",s:[
+   ["I've been trying to exercise three times a week.","Tôi đang cố tập thể dục ba lần một tuần."],
+   ["Walking after dinner helps me sleep better.","Đi bộ sau bữa tối giúp tôi ngủ ngon hơn."],
+   ["I should drink more water during the day.","Tôi nên uống nhiều nước hơn trong ngày."],
+   ["Sitting at a desk all day is bad for your back.","Ngồi bàn cả ngày không tốt cho lưng."],
+   ["Try to take a short break every hour.","Hãy cố nghỉ ngắn mỗi giờ."]]},
+  {topic:"Học tập",s:[
+   ["I'm learning English to improve my career.","Tôi học tiếng Anh để phát triển sự nghiệp."],
+   ["Listening is the hardest part for me.","Nghe là phần khó nhất với tôi."],
+   ["I practice for fifteen minutes every morning.","Tôi luyện mười lăm phút mỗi sáng."],
+   ["Watching videos with subtitles really helps.","Xem video có phụ đề thật sự có ích."],
+   ["The most important thing is to keep going.","Điều quan trọng nhất là kiên trì."]]},
+  {topic:"Mua sắm online",s:[
+   ["I ordered a new pair of shoes last night.","Tối qua tôi đặt một đôi giày mới."],
+   ["The delivery usually takes two or three days.","Giao hàng thường mất hai, ba ngày."],
+   ["Unfortunately, they sent me the wrong size.","Tiếc là họ gửi nhầm cỡ cho tôi."],
+   ["I'd like to return this item, please.","Tôi muốn trả lại món hàng này."],
+   ["When will I get my money back?","Khi nào tôi nhận lại tiền?"]]}
+ ],
+ B2:[
+  {topic:"Báo cáo sự cố",s:[
+   ["We've identified the cause of the issue and are working on a fix.","Chúng tôi đã tìm ra nguyên nhân và đang khắc phục."],
+   ["The problem only affects orders created after the latest update.","Lỗi chỉ ảnh hưởng đơn tạo sau bản cập nhật mới nhất."],
+   ["In the meantime, I'd suggest using the old report as a workaround.","Trong lúc chờ, tôi đề nghị dùng báo cáo cũ để tạm thời xử lý."],
+   ["I'll keep you updated as soon as there's any progress.","Tôi sẽ cập nhật ngay khi có tiến triển."],
+   ["We apologize for the inconvenience this has caused your team.","Xin lỗi vì sự bất tiện đã gây ra cho đội của bạn."]]},
+  {topic:"Quản lý thời gian",s:[
+   ["I've realized that checking email constantly kills my focus.","Tôi nhận ra kiểm tra email liên tục làm mất tập trung."],
+   ["Now I block two hours every morning for deep work.","Giờ tôi dành hai tiếng mỗi sáng cho việc cần tập trung."],
+   ["It's surprising how much more I get done that way.","Thật bất ngờ khi làm vậy tôi xong được nhiều việc hơn."],
+   ["The hardest part is saying no to unexpected requests.","Khó nhất là từ chối những yêu cầu bất chợt."],
+   ["But protecting your time is not the same as being rude.","Nhưng giữ thời gian không có nghĩa là bất lịch sự."]]},
+  {topic:"Công nghệ",s:[
+   ["Artificial intelligence is changing the way we work faster than expected.","AI đang thay đổi cách chúng ta làm việc nhanh hơn dự kiến."],
+   ["Many routine tasks can already be handled automatically.","Nhiều việc lặp lại đã có thể tự động xử lý."],
+   ["That doesn't mean people will become less important, though.","Tuy nhiên điều đó không có nghĩa con người kém quan trọng hơn."],
+   ["What matters is knowing which questions to ask.","Điều quan trọng là biết nên hỏi câu gì."],
+   ["Those who keep learning will benefit the most.","Người tiếp tục học hỏi sẽ được lợi nhiều nhất."]]},
+  {topic:"Góp ý công việc",s:[
+   ["I really appreciate the effort you put into this proposal.","Tôi rất trân trọng công sức bạn bỏ vào đề xuất này."],
+   ["Overall it's clear, but the budget section needs more detail.","Nhìn chung rõ ràng nhưng phần ngân sách cần chi tiết hơn."],
+   ["Would it be possible to add a short timeline as well?","Bạn có thể thêm một mốc thời gian ngắn không?"],
+   ["I think the client will want to see the risks up front.","Tôi nghĩ khách hàng muốn thấy rủi ro ngay từ đầu."],
+   ["Let's go through the revised version on Thursday.","Thứ năm mình cùng xem bản đã sửa nhé."]]},
+  {topic:"Thói quen tốt",s:[
+   ["Building a habit is less about motivation and more about consistency.","Xây thói quen ít phụ thuộc động lực, mà là sự đều đặn."],
+   ["Starting small makes it much easier to stick with something.","Bắt đầu nhỏ giúp dễ duy trì hơn nhiều."],
+   ["Even ten minutes a day adds up over a few months.","Mỗi ngày mười phút, vài tháng cũng thành nhiều."],
+   ["If you miss a day, just make sure you don't miss two.","Lỡ một ngày thì đừng để lỡ ngày thứ hai."],
+   ["Eventually it becomes part of who you are.","Rồi nó sẽ trở thành một phần con người bạn."]]},
+  {topic:"Đàm phán",s:[
+   ["We're interested in your offer, but the price is a bit higher than we expected.","Chúng tôi quan tâm đề xuất, nhưng giá hơi cao hơn dự kiến."],
+   ["Is there any flexibility if we sign a longer contract?","Có linh động không nếu chúng tôi ký hợp đồng dài hơn?"],
+   ["We could also consider paying part of it in advance.","Chúng tôi cũng có thể trả trước một phần."],
+   ["I'll need to discuss this with my manager before deciding.","Tôi cần trao đổi với quản lý trước khi quyết định."],
+   ["Can we schedule another call early next week?","Mình hẹn cuộc gọi khác đầu tuần sau được không?"]]}
+ ]
+};
+const LEVEL_NAME = {A2:"Cơ bản",B1:"Trung cấp",B2:"Nâng cao"};
+
+/* ---------------- Text helpers ---------------- */
+const CONTRACT = {"i'm":"i am","you're":"you are","we're":"we are","they're":"they are","it's":"it is","that's":"that is","there's":"there is","what's":"what is","let's":"let us","i've":"i have","we've":"we have","you've":"you have","i'll":"i will","we'll":"we will","you'll":"you will","i'd":"i would","we'd":"we would","don't":"do not","doesn't":"does not","didn't":"did not","can't":"cannot","won't":"will not","isn't":"is not","aren't":"are not","wasn't":"was not","shouldn't":"should not","couldn't":"could not","wouldn't":"would not"};
+const NUM = {"1":"one","2":"two","3":"three","4":"four","5":"five","6":"six","7":"seven","8":"eight","9":"nine","10":"ten","15":"fifteen"};
+function norm(t){
+  return (t||"").toLowerCase().replace(/[’‘]/g,"'").replace(/[^a-z0-9'\s-]/g," ").replace(/-/g," ")
+    .split(/\s+/).filter(Boolean).flatMap(w=>{
+      const x = CONTRACT[w]||NUM[w]||w.replace(/^'+|'+$/g,"");
+      return x.split(" ");
+    }).map(w=>w==="cannot"?"can not":w).join(" ").split(" ").filter(Boolean);
+}
+function displayTokens(sentence){ return sentence.split(/\s+/); }
+// LCS alignment: returns {matched, flags (per normalized target word)}
+function align(target, said){
+  const a=norm(target), b=norm(said), n=a.length, m=b.length;
+  const dp=Array.from({length:n+1},()=>new Array(m+1).fill(0));
+  for(let i=n-1;i>=0;i--)for(let j=m-1;j>=0;j--)dp[i][j]=a[i]===b[j]?dp[i+1][j+1]+1:Math.max(dp[i+1][j],dp[i][j+1]);
+  const flags=new Array(n).fill(false);let i=0,j=0;
+  while(i<n&&j<m){if(a[i]===b[j]){flags[i]=true;i++;j++}else if(dp[i+1][j]>=dp[i][j+1])i++;else j++;}
+  const matched=dp[0][0], extra=Math.max(0,m-matched);
+  const score=n?Math.max(0,Math.round(100*matched/(n+0.5*extra))):0;
+  return {a,flags,matched,score};
+}
+// Map normalized flags back to display words
+function renderMarked(sentence, flags){
+  const out=[];let k=0;
+  for(const tok of displayTokens(sentence)){
+    const parts=norm(tok);const cnt=parts.length;
+    if(!cnt){out.push(esc(tok));continue}
+    const ok=flags.slice(k,k+cnt).every(Boolean);k+=cnt;
+    out.push(`<span class="w ${ok?"ok":"miss"}">${esc(tok)}</span>`);
+  }
+  return out.join(" ");
+}
+function missedWords(sentence, flags){
+  const res=[];let k=0;
+  for(const tok of displayTokens(sentence)){
+    const parts=norm(tok);const cnt=parts.length;
+    if(cnt&&!flags.slice(k,k+cnt).every(Boolean))res.push(tok.toLowerCase().replace(/[^a-z']/g,""));
+    k+=cnt;
+  }
+  return res.filter(w=>w.length>1);
+}
+function esc(s){return String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]))}
+const $=s=>document.querySelector(s);
+
+/* ---------------- Date helpers ---------------- */
+function dayKey(d=new Date()){return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0")}
+function dayIndex(d=new Date()){return Math.floor(new Date(d.getFullYear(),d.getMonth(),d.getDate()).getTime()/86400000)}
+
+/* ---------------- Storage ---------------- */
+let state={level:"B1",sessions:[],missed:{}};
+let db=null, docRef=null;
+const LS="shadowing-progress-v1";
+function lsLoad(){try{const v=localStorage.getItem(LS);if(v)return JSON.parse(v)}catch(e){}return null}
+function lsSave(){try{localStorage.setItem(LS,JSON.stringify(state))}catch(e){}}
+async function initStorage(){
+  const local=lsLoad(); if(local)state={...state,...local};
+  renderAll();
+  try{
+    if(!window.claude||!window.claude.use)return;
+    db=await window.claude.use("db"); const user=await window.claude.use("user");
+    if(!db||!user)return;
+    const id=await user.id(); if(!id)return;
+    docRef=db.doc("data/users/"+id+"/progress");
+    const snap=await docRef.get();
+    if(snap.exists){
+      const remote=snap.data();
+      // merge: keep whichever has more sessions
+      if((remote.sessions||[]).length>=(state.sessions||[]).length)state={...state,...remote};
+      else await docRef.set(JSON.parse(JSON.stringify(state)));
+      lsSave(); renderAll();
+    }else if(state.sessions.length){await docRef.set(JSON.parse(JSON.stringify(state)))}
+  }catch(e){console.warn("db",e);docRef=null}
+}
+async function save(){
+  lsSave();
+  if(docRef){try{await docRef.set(JSON.parse(JSON.stringify(state)))}catch(e){console.warn("save",e)}}
+}
+
+/* ---------------- Speech ---------------- */
+let rate=1, voice=null;
+function pickVoice(){
+  const vs=speechSynthesis.getVoices().filter(v=>/^en[-_]/i.test(v.lang));
+  voice=vs.find(v=>/en[-_]US/i.test(v.lang)&&/(Samantha|Google US|Aria|Jenny|Natural)/i.test(v.name))||vs.find(v=>/en[-_]US/i.test(v.lang))||vs[0]||null;
+}
+if("speechSynthesis" in window){pickVoice();speechSynthesis.onvoiceschanged=pickVoice}
+function speak(text,r=rate){
+  return new Promise(res=>{
+    if(!("speechSynthesis" in window)){res(0);return}
+    speechSynthesis.cancel();
+    const u=new SpeechSynthesisUtterance(text);u.lang="en-US";u.rate=r;if(voice)u.voice=voice;
+    const t0=performance.now();u.onend=()=>res(performance.now()-t0);u.onerror=()=>res(0);
+    speechSynthesis.speak(u);
+  });
+}
+const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+let srBroken=!SR, srReason=SR?"":"no-api";
+const SR_MSG={
+  "no-api":"Trình duyệt này không có tính năng nhận giọng nói. Hãy mở link bằng Safari (iPhone) hoặc Chrome (Android), không mở trong app Claude hay Zalo/Facebook.",
+  "not-allowed":"Micro bị chặn (mã: not-allowed). Kiểm tra quyền micro của trình duyệt. Nếu đã cho phép mà vẫn bị, trang đang bị chặn micro khi chạy trong claude.ai.",
+  "service-not-allowed":"Dịch vụ nhận giọng nói của máy đang tắt (mã: service-not-allowed). iPhone: Cài đặt → Cài đặt chung → Bàn phím → bật Đọc chính tả. Android: cập nhật app Google.",
+  "audio-capture":"Không lấy được micro (mã: audio-capture). Micro có thể đang bị app khác dùng, hãy tắt app gọi điện/ghi âm rồi thử lại.",
+  "start":"Không khởi động được nhận giọng nói (mã: start). Tải lại trang rồi thử lại."
+};
+const srMsg=()=>SR_MSG[srReason]||("Không chấm được giọng nói (mã: "+(srReason||"không rõ")+").");
+function listenOnce(target){
+  return new Promise((resolve,reject)=>{
+    const r=new SR();r.lang="en-US";r.interimResults=true;r.maxAlternatives=3;r.continuous=false;
+    let best="",t0=null,tEnd=null,done=false;
+    r.onresult=e=>{
+      if(t0===null)t0=performance.now();tEnd=performance.now();
+      let txt="";for(let i=0;i<e.results.length;i++){
+        const res=e.results[i];let pick=res[0].transcript,ps=-1;
+        for(let k=0;k<res.length;k++){const s=align(target,res[k].transcript).score;if(s>ps){ps=s;pick=res[k].transcript}}
+        txt+=pick+" ";
+      }
+      best=txt.trim();onInterim(best);
+    };
+    r.onerror=e=>{if(done)return;done=true;reject(e.error||"error")};
+    r.onend=()=>{if(done)return;done=true;resolve({text:best,ms:(t0!==null&&tEnd>t0)?tEnd-t0:0})};
+    try{r.start()}catch(e){done=true;reject("start")}
+    currentRec=r;
+  });
+}
+let currentRec=null,onInterim=()=>{};
+
+/* ---------------- Lesson flow ---------------- */
+let lesson=null;
+function todayLesson(level){
+  const list=BANK[level];const t=list[dayIndex()%list.length];
+  return {topic:t.topic,items:t.s.map(([en,vi])=>({en,vi})),source:"bank"};
+}
+function newRun(les){
+  lesson={...les,level:state.level,step:"dict",i:0,
+    dict:les.items.map(()=>({score:null,flags:null,typed:"",plays:0})),
+    shad:les.items.map(()=>({score:null,flags:null,heard:"",wpm:0,tries:0,self:false,shadows:0}))};
+  $("#startView").hidden=true;$("#resultView").hidden=true;$("#lessonView").hidden=false;
+  drawStep();
+}
+function setBar(){
+  const n=lesson.items.length,total=n*2;
+  const done=(lesson.step==="dict"?lesson.i:n+lesson.i);
+  $("#bar").style.width=(100*done/total)+"%";
+  $("#stageName").textContent=lesson.step==="dict"?"Bước 1 · Nghe chép":"Bước 2 · Shadowing";
+  $("#stageCount").textContent=`Câu ${lesson.i+1}/${n} · ${lesson.topic}`;
+}
+function speedCtl(){
+  return `<div class="speed" role="group" aria-label="Tốc độ">
+    <button data-rate="0.75" aria-pressed="${rate===0.75}">0.75×</button>
+    <button data-rate="1" aria-pressed="${rate===1}">1×</button></div>`;
+}
+function bindSpeed(){
+  document.querySelectorAll("[data-rate]").forEach(b=>b.onclick=()=>{rate=+b.dataset.rate;document.querySelectorAll("[data-rate]").forEach(x=>x.setAttribute("aria-pressed",x===b))});
+}
+function drawStep(){
+  setBar();
+  const P=$("#lessonPanel");const it=lesson.items[lesson.i];
+  if(lesson.step==="dict"){
+    const d=lesson.dict[lesson.i];
+    if(d.score===null){
+      P.innerHTML=`<h2>Nghe và gõ lại</h2>
+        <p class="muted small">Chưa nhìn chữ. Bật tối đa 3 lần, gõ những gì bạn nghe được — sai chính tả nhẹ cũng không sao.</p>
+        <div class="row" style="margin:12px 0"><button class="btn model" id="play">Nghe câu (${3-d.plays} lượt)</button>${speedCtl()}</div>
+        <textarea id="typed" placeholder="Gõ câu bạn nghe được…" autocapitalize="off" autocomplete="off" spellcheck="false">${esc(d.typed)}</textarea>
+        <div class="row" style="margin-top:12px"><button class="btn" id="check">Kiểm tra</button><button class="btn ghost" id="skip">Không nghe được</button></div>`;
+      bindSpeed();
+      const play=$("#play");if(d.plays>=3)play.disabled=true;
+      play.onclick=async()=>{if(d.plays>=3)return;d.plays++;play.textContent=`Nghe câu (${3-d.plays} lượt)`;play.disabled=true;await speak(it.en);play.disabled=d.plays>=3};
+      $("#typed").oninput=e=>d.typed=e.target.value;
+      $("#check").onclick=()=>{const r=align(it.en,d.typed);d.score=r.score;d.flags=r.flags;drawStep()};
+      $("#skip").onclick=()=>{d.typed="";const r=align(it.en,"");d.score=0;d.flags=r.flags;drawStep()};
+    }else{
+      P.innerHTML=`<h2>Kết quả câu ${lesson.i+1}</h2>
+        <div class="score"><b>${d.score}%</b><span class="muted">từ nghe đúng</span></div>
+        <div class="sentence">${renderMarked(it.en,d.flags)}</div>
+        <p class="vi">${esc(it.vi)}</p>
+        ${d.typed?`<div class="heard">${esc(d.typed)}</div>`:""}
+        <div class="row" style="margin-top:12px"><button class="btn ghost" id="replay">Nghe lại</button><button class="btn model" id="next">${lesson.i<lesson.items.length-1?"Câu tiếp theo":"Sang bước Shadowing"}</button></div>`;
+      $("#replay").onclick=()=>speak(it.en);
+      $("#next").onclick=()=>{if(lesson.i<lesson.items.length-1)lesson.i++;else{lesson.step="shad";lesson.i=0}drawStep()};
+    }
+    return;
+  }
+  // Shadowing step
+  const s=lesson.shad[lesson.i];
+  const hasScore=s.score!==null;
+  P.innerHTML=`<h2>Shadowing</h2>
+    <div class="sentence" id="sent">${hasScore?renderMarked(it.en,s.flags):esc(it.en)}</div>
+    <p class="vi">${esc(it.vi)}</p>
+    <p class="small muted"><b style="color:var(--model)">Nói đuổi:</b> bấm phát và nói theo cùng lúc, chậm hơn nửa nhịp. Làm 2–3 lần. <span id="shCount">${s.shadows?`(đã luyện ${s.shadows} lần)`:""}</span></p>
+    <div class="row" style="margin-bottom:16px"><button class="btn model" id="shadow">Phát & nói đuổi</button>${speedCtl()}</div>
+    <p class="small muted"><b style="color:var(--you)">Chấm điểm:</b> tự nói lại cả câu một mình, không có giọng mẫu.</p>
+    <div class="row"><button class="btn you" id="rec" ${srBroken?"hidden":""}>Nói để chấm điểm</button></div>
+    <div id="recArea">${hasScore?scoreBlock(s):""}</div>
+    ${srBroken?selfRateBlock(s):""}
+    <div class="row" style="margin-top:16px"><button class="btn" id="next" ${hasScore?"":"disabled"}>${lesson.i<lesson.items.length-1?"Câu tiếp theo":"Xem kết quả"}</button>
+    ${hasScore?"":`<button class="btn ghost" id="skipS">Bỏ qua câu này</button>`}</div>`;
+  bindSpeed();
+  $("#shadow").onclick=async e=>{e.target.disabled=true;await speak(it.en);s.shadows++;$("#shCount").textContent=`(đã luyện ${s.shadows} lần)`;e.target.disabled=false};
+  if(!srBroken)$("#rec").onclick=()=>doRecord(it,s);
+  if(srBroken)bindSelfRate(it,s);
+  $("#next").onclick=()=>{if(lesson.i<lesson.items.length-1){lesson.i++;drawStep()}else finish()};
+  const sk=$("#skipS");if(sk)sk.onclick=()=>{s.score=0;s.flags=align(it.en,"").flags;if(lesson.i<lesson.items.length-1){lesson.i++;drawStep()}else finish()};
+}
+function scoreBlock(s){
+  return `<div class="score"><b>${s.score}%</b><span class="muted">${s.self?"tự chấm":"phát âm được nhận đúng"}${s.wpm?` · ${s.wpm} từ/phút`:""}${s.tries>1?` · lần tốt nhất / ${s.tries} lần`:""}</span></div>
+    ${s.heard?`<div class="heard">Máy nghe được: ${esc(s.heard)}</div>`:""}`;
+}
+function selfRateBlock(s){
+  return `<div class="note" style="margin-top:10px"><b>Chưa dùng được micro.</b> ${esc(srMsg())}<div class="row" style="margin-top:10px"><button class="btn you" id="srRetry" ${SR?"":"hidden"}>Thử lại micro</button></div><p class="small" style="margin:10px 0 0">Trong lúc chờ, bạn có thể tự nói một lần rồi tự đánh giá:</p></div>
+   <div class="selfrate"><button class="chip" data-self="40">Còn vấp nhiều</button><button class="chip" data-self="70">Tạm ổn</button><button class="chip" data-self="90">Trôi chảy</button></div>`;
+}
+function bindSelfRate(it,s){
+  const rt=$("#srRetry");if(rt)rt.onclick=()=>{srBroken=false;srReason="";drawStep()};
+  document.querySelectorAll("[data-self]").forEach(b=>b.onclick=()=>{s.score=+b.dataset.self;s.self=true;s.flags=norm(it.en).map(()=>true);s.tries++;drawStep()});
+}
+async function doRecord(it,s){
+  const btn=$("#rec"),area=$("#recArea");
+  speechSynthesis&&speechSynthesis.cancel();
+  btn.disabled=true;btn.innerHTML=`<span class="rec"></span>Đang nghe… hãy nói`;
+  area.innerHTML=`<div class="heard" id="live">…</div>`;
+  onInterim=t=>{const l=$("#live");if(l)l.textContent=t};
+  try{
+    const {text,ms}=await listenOnce(it.en);
+    const r=align(it.en,text);s.tries++;
+    const words=norm(text).length;const wpm=ms>600&&words>1?Math.round(words/(ms/60000)):0;
+    if(s.score===null||r.score>=s.score){s.score=r.score;s.flags=r.flags;s.heard=text;s.wpm=wpm||s.wpm}
+    if(!text){area.innerHTML=`<p class="err">Không nghe thấy gì. Kiểm tra micro rồi thử lại.</p>`;btn.disabled=false;btn.textContent="Nói để chấm điểm";if(s.score!==null)drawStep();return}
+    drawStep();
+  }catch(err){
+    btn.disabled=false;btn.textContent="Nói để chấm điểm";
+    if(err==="not-allowed"||err==="service-not-allowed"||err==="start"||err==="audio-capture"){
+      srBroken=true;srReason=err;drawStep();
+    }else area.innerHTML=`<p class="err">Chưa nhận được giọng (${esc(err)}). Bấm lại và nói rõ hơn.</p>`;
+  }
+}
+
+/* ---------------- Finish & results ---------------- */
+function avg(a){const v=a.filter(x=>typeof x==="number");return v.length?Math.round(v.reduce((p,c)=>p+c,0)/v.length):null}
+const pct=v=>v==null?"–":v+"%";
+async function finish(){
+  const listen=avg(lesson.dict.map(d=>d.score)), speakS=avg(lesson.shad.map(s=>s.score));
+  const wpms=lesson.shad.map(s=>s.wpm).filter(Boolean);const wpm=wpms.length?avg(wpms):0;
+  const listenN=listen??0, speakN=speakS??0;
+  const missedL=[],missedS=[];
+  lesson.items.forEach((it,i)=>{
+    if(lesson.dict[i].flags)missedL.push(...missedWords(it.en,lesson.dict[i].flags));
+    if(lesson.shad[i].flags&&!lesson.shad[i].self)missedS.push(...missedWords(it.en,lesson.shad[i].flags));
+  });
+  const all=[...missedL,...missedS];all.forEach(w=>state.missed[w]=(state.missed[w]||0)+1);
+  const selfRated=lesson.shad.some(s=>s.self);
+  const prev=state.sessions.slice(-7);
+  const sess={date:dayKey(),t:Date.now(),level:lesson.level,topic:lesson.topic,listen,speak:speakS,wpm,self:selfRated};
+  state.sessions.push(sess);if(state.sessions.length>400)state.sessions=state.sessions.slice(-400);
+  await save();
+  const pL=prev.length?avg(prev.map(x=>x.listen)):null,pS=prev.length?avg(prev.map(x=>x.speak)):null;
+  const delta=(v,p)=>(p==null||v==null)?"":`<span class="d ${v>=p?"up":"down"}">${v>=p?"+":""}${v-p} so với TB 7 buổi trước</span>`;
+  $("#lessonView").hidden=true;
+  const R=$("#resultView");R.hidden=false;
+  R.innerHTML=`<div class="panel"><h2>Xong buổi hôm nay</h2>
+    <p class="muted small">${LEVEL_NAME[lesson.level]} · ${esc(lesson.topic)}</p>
+    <div class="result-grid">
+      <div class="metric"><div class="v" style="color:var(--model)">${listen}%</div><div class="l">Nghe</div>${delta(listen,pL)}</div>
+      <div class="metric"><div class="v" style="color:var(--you)">${speakS}%</div><div class="l">Nói${selfRated?" (có tự chấm)":""}</div>${delta(speakS,pS)}</div>
+    </div>
+    ${wpm?`<p class="small">Tốc độ nói trung bình: <b>${wpm} từ/phút</b> ${wpm<100?"— còn chậm, thử nói đuổi ở tốc độ 1×.":wpm>170?"— hơi nhanh, chú ý rõ âm cuối.":"— tốc độ tự nhiên."}</p>`:""}
+    ${all.length?`<p class="small" style="margin-top:10px"><b>Từ cần luyện lại:</b></p><div class="words">${[...new Set(all)].slice(0,14).map(w=>`<span>${esc(w)}</span>`).join("")}</div>`:`<p class="small">Không sai từ nào. Rất tốt!</p>`}
+    ${levelHint()}
+    <div class="row" style="margin-top:16px"><button class="btn model" id="again">Luyện lại bài này</button><button class="btn ghost" id="toProg">Xem tiến bộ</button></div></div>`;
+  $("#again").onclick=()=>newRun({topic:lesson.topic,items:lesson.items,source:lesson.source});
+  $("#toProg").onclick=()=>switchTab("progress");
+  renderAll();
+}
+function levelHint(){
+  const last=state.sessions.filter(s=>s.level===state.level).slice(-3);
+  if(last.length===3&&last.every(s=>s.listen>=85&&s.speak>=85&&!s.self)&&state.level!=="B2"){
+    const nx=state.level==="A2"?"B1":"B2";
+    return `<div class="note">3 buổi liền trên 85% cả nghe và nói. Bạn có thể chuyển lên <b>${LEVEL_NAME[nx]} (${nx})</b>.</div>`;
+  }
+  const last3=state.sessions.slice(-3);
+  if(last3.length===3&&last3.every(s=>s.listen!=null&&s.listen<50)&&state.level!=="A2")return `<div class="note">Điểm nghe dưới 50% ba buổi liền. Thử hạ một trình độ để luyện chắc hơn.</div>`;
+  return "";
+}
+
+/* ---------------- Progress view ---------------- */
+function streak(){
+  const days=new Set(state.sessions.map(s=>s.date));let n=0;const d=new Date();
+  if(!days.has(dayKey(d)))d.setDate(d.getDate()-1);
+  while(days.has(dayKey(d))){n++;d.setDate(d.getDate()-1)}
+  return n;
+}
+function dailyAgg(){
+  const map=new Map();
+  for(const s of state.sessions){const m=map.get(s.date)||{date:s.date,L:[],S:[]};m.L.push(s.listen);m.S.push(s.speak);map.set(s.date,m)}
+  return [...map.values()].map(m=>({date:m.date,listen:avg(m.L),speak:avg(m.S)}));
+}
+function chart(points){
+  const W=600,H=220,pl=34,pr=10,pt=12,pb=28,n=points.length;
+  const x=i=>pl+(n<=1?(W-pl-pr)/2:i*(W-pl-pr)/(n-1)), y=v=>pt+(100-v)*(H-pt-pb)/100;
+  const line=(k,c)=>{const pts=points.map((p,i)=>[i,p[k]]).filter(q=>q[1]!=null);return `<polyline fill="none" stroke="${c}" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round" points="${pts.map(q=>x(q[0])+","+y(q[1])).join(" ")}"/>`+pts.map(q=>`<circle cx="${x(q[0])}" cy="${y(q[1])}" r="3.5" fill="${c}"/>`).join("")};
+  const grid=[0,25,50,75,100].map(v=>`<line x1="${pl}" x2="${W-pr}" y1="${y(v)}" y2="${y(v)}" stroke="var(--line)" stroke-width="1"/><text x="${pl-6}" y="${y(v)+4}" text-anchor="end" font-size="11" fill="var(--muted)">${v}</text>`).join("");
+  const step=Math.max(1,Math.ceil(n/6));
+  const labels=points.map((p,i)=>i%step===0||i===n-1?`<text x="${x(i)}" y="${H-8}" text-anchor="middle" font-size="11" fill="var(--muted)">${p.date.slice(8)}/${p.date.slice(5,7)}</text>`:"").join("");
+  return `<svg viewBox="0 0 ${W} ${H}" width="100%" style="min-width:320px" role="img" aria-label="Biểu đồ điểm nghe và nói theo ngày">${grid}${labels}${line("listen","var(--model)")}${line("speak","var(--you)")}</svg>`;
+}
+function renderProgress(){
+  const P=$("#progressPanel");const S=state.sessions;
+  if(!S.length){P.innerHTML=`<h2>Chưa có dữ liệu</h2><p class="muted">Hoàn thành buổi luyện đầu tiên ở tab Hôm nay — điểm nghe và nói sẽ được lưu và vẽ thành biểu đồ ở đây.</p>`;return}
+  const last7=S.slice(-7),prev7=S.slice(-14,-7);
+  const L=avg(last7.map(s=>s.listen)),Sp=avg(last7.map(s=>s.speak));
+  const pL=prev7.length?avg(prev7.map(s=>s.listen)):null,pS=prev7.length?avg(prev7.map(s=>s.speak)):null;
+  const first=S.slice(0,3),fL=avg(first.map(s=>s.listen)),fS=avg(first.map(s=>s.speak));
+  const d=(v,p)=>(p==null||v==null)?`<span class="d muted">cần thêm buổi để so sánh</span>`:`<span class="d ${v>=p?"up":"down"}">${v>=p?"▲ +":"▼ "}${v-p} so với 7 buổi trước</span>`;
+  const days=new Set(S.map(s=>s.date)).size;
+  const missed=Object.entries(state.missed).sort((a,b)=>b[1]-a[1]).slice(0,16);
+  const agg=dailyAgg().slice(-30);
+  P.innerHTML=`<h2>Tiến bộ của bạn</h2>
+   <p class="muted small">${days} ngày luyện · ${S.length} buổi · chuỗi hiện tại ${streak()} ngày</p>
+   <div class="result-grid">
+    <div class="metric"><div class="v" style="color:var(--model)">${pct(L)}</div><div class="l">Nghe · TB 7 buổi gần nhất</div>${d(L,pL)}</div>
+    <div class="metric"><div class="v" style="color:var(--you)">${pct(Sp)}</div><div class="l">Nói · TB 7 buổi gần nhất</div>${d(Sp,pS)}</div>
+   </div>
+   ${S.length>=6&&L!=null&&fL!=null&&Sp!=null&&fS!=null?`<p class="small">So với 3 buổi đầu tiên: nghe <b class="${L>=fL?"up":"down"}">${L>=fL?"+":""}${L-fL}</b>, nói <b class="${Sp>=fS?"up":"down"}">${Sp>=fS?"+":""}${Sp-fS}</b> điểm.</p>`:""}
+   <div class="chartbox" style="margin-top:8px">${chart(agg)}</div>
+   <div class="legend"><span style="color:var(--model)">Nghe</span><span style="color:var(--you)">Nói</span></div>
+   ${missed.length?`<h2 style="margin-top:20px">Từ hay sai nhất</h2><p class="muted small">Số lần sai khi nghe chép hoặc khi nói. Hãy luyện đọc riêng các từ này.</p><div class="words">${missed.map(([w,c])=>`<span>${esc(w)}<small>×${c}</small></span>`).join("")}</div>`:""}
+   <h2 style="margin-top:20px">Lịch sử gần đây</h2>
+   <div class="tablebox"><table><thead><tr><th>Ngày</th><th>Bài</th><th>Nghe</th><th>Nói</th><th>Từ/phút</th></tr></thead><tbody>
+   ${S.slice(-10).reverse().map(s=>`<tr><td>${s.date.slice(8)}/${s.date.slice(5,7)}</td><td>${s.mode==="commute"?"🎧 ":""}${s.level} · ${esc(s.topic)}</td><td>${pct(s.listen)}</td><td>${pct(s.speak)}${s.self?"*":""}</td><td>${s.wpm||"–"}</td></tr>`).join("")}
+   </tbody></table></div>
+   ${S.some(s=>s.self)?`<p class="muted small" style="margin-top:6px">* có câu tự chấm</p>`:""}
+   ${S.some(s=>s.mode==="commute")?`<p class="muted small" style="margin-top:6px">🎧 buổi chế độ tai nghe: chỉ chấm điểm nói (nghe một lần rồi nhắc lại, không nhìn chữ)</p>`:""}`;
+}
+
+/* ---------------- Start view ---------------- */
+function renderStart(){
+  document.querySelectorAll("[data-level]").forEach(b=>b.setAttribute("aria-pressed",b.dataset.level===state.level));
+  const les=todayLesson(state.level);
+  $("#todayTitle").textContent="Bài hôm nay: "+les.topic;
+  $("#todayMeta").textContent=`${LEVEL_NAME[state.level]} (${state.level}) · 5 câu · khoảng 12 phút`;
+  $("#doneToday").hidden=!state.sessions.some(s=>s.date===dayKey());
+}
+function renderAll(){$("#streakNum").textContent=streak();renderStart();renderProgress()}
+
+document.querySelectorAll("[data-level]").forEach(b=>b.onclick=()=>{state.level=b.dataset.level;save();renderStart()});
+$("#startBtn").onclick=()=>newRun(todayLesson(state.level));
+
+function switchTab(name){
+  document.querySelectorAll("nav.tabs button").forEach(b=>b.setAttribute("aria-selected",b.dataset.tab===name));
+  ["today","progress","guide"].forEach(t=>$("#tab-"+t).hidden=t!==name);
+  if(name==="progress")renderProgress();
+}
+document.querySelectorAll("nav.tabs button").forEach(b=>b.onclick=()=>switchTab(b.dataset.tab));
+
+/* ---------------- Claude-generated lesson (optional) ---------------- */
+let sample=null;
+(async()=>{try{if(window.claude&&window.claude.use){sample=await window.claude.use("sample");if(sample)$("#genBtn").hidden=false}}catch(e){}})();
+$("#genBtn").onclick=async()=>{
+  const btn=$("#genBtn"),err=$("#startErr");err.hidden=true;btn.disabled=true;btn.textContent="Đang soạn bài…";
+  const used=state.sessions.slice(-10).map(s=>s.topic).join(", ");
+  const spec={A2:"CEFR A2: 6-9 words per sentence, simple present/past, everyday vocabulary",B1:"CEFR B1: 9-14 words, common workplace and daily-life phrases",B2:"CEFR B2: 12-20 words, natural spoken business English with linking words"}[state.level];
+  try{
+    const out=await sample.json(`You write English shadowing practice for a Vietnamese adult learner who works in customer support for business software.
+Level: ${spec}.
+Pick one fresh, practical topic (avoid these recent topics: ${used||"none"}). Write 5 connected sentences forming a short natural spoken passage on that topic.
+Rules: no digits (write numbers as words), no proper names, no quotes or parentheses, sentences sound natural when spoken aloud.
+Return ONLY JSON: {"topic":"<short Vietnamese topic name>","sentences":[{"en":"...","vi":"<natural Vietnamese translation>"}]}`,{modelTier:"quick",cache:false});
+    const items=(out&&out.sentences||[]).filter(x=>x&&x.en).slice(0,5).map(x=>({en:String(x.en).trim(),vi:String(x.vi||"").trim()}));
+    if(items.length<3)throw new Error("short");
+    newRun({topic:String(out.topic||"Bài mới").slice(0,40),items,source:"claude"});
+  }catch(e){
+    if(e&&e.code==="not_granted"){btn.hidden=true}
+    err.textContent="Chưa soạn được bài mới. Bạn vẫn có thể luyện bài hôm nay.";err.hidden=false;
+  }finally{btn.disabled=false;btn.textContent="Bài mới do Claude soạn"}
+};
+
+/* ---------------- Commute (hands-free) mode ---------------- */
+const cm={token:0,i:0,items:[],topic:"",scores:[],repeats:2,gap:1.3,viMeaning:false,useMic:!srBroken,paused:true,off:0,atResult:false};
+let keepAlive=null,actx=null,wake=null;
+const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+const FATAL=["not-allowed","service-not-allowed","start","audio-capture"];
+function silentWav(){
+  const n=8000,b=new Uint8Array(44+n),v=new DataView(b.buffer),w=(o,t)=>{for(let i=0;i<t.length;i++)b[o+i]=t.charCodeAt(i)};
+  w(0,"RIFF");v.setUint32(4,36+n,true);w(8,"WAVE");w(12,"fmt ");v.setUint32(16,16,true);v.setUint16(20,1,true);v.setUint16(22,1,true);
+  v.setUint32(24,8000,true);v.setUint32(28,8000,true);v.setUint16(32,1,true);v.setUint16(34,8,true);w(36,"data");v.setUint32(40,n,true);b.fill(128,44);
+  let t="";for(let i=0;i<b.length;i++)t+=String.fromCharCode(b[i]);return btoa(t);
+}
+function cmSet(t){$("#cmPhase").textContent=t;$("#pkPhase").textContent=t}
+function cue(){
+  try{if(actx){const o=actx.createOscillator(),g=actx.createGain();o.frequency.value=880;g.gain.value=0.18;o.connect(g);g.connect(actx.destination);o.start();o.stop(actx.currentTime+0.15)}}catch(e){}
+  return sleep(300);
+}
+function sayVi(text){return new Promise(res=>{try{speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(text);u.lang="vi-VN";const vv=speechSynthesis.getVoices().find(x=>/^vi/i.test(x.lang));if(vv)u.voice=vv;u.rate=1.05;u.onend=res;u.onerror=res;speechSynthesis.speak(u)}catch(e){res()}})}
+function setPS(s){try{navigator.mediaSession.playbackState=s}catch(e){}}
+function cmStop(){cm.token++;try{speechSynthesis.cancel()}catch(e){}try{currentRec&&currentRec.abort()}catch(e){}}
+function cmOpts(){
+  document.querySelectorAll("#cmSetup .seg").forEach(seg=>{const k=seg.dataset.opt;
+    seg.querySelectorAll("button").forEach(b=>{const val=(k==="repeats"||k==="gap")?+b.dataset.v:b.dataset.v==="1";
+      b.setAttribute("aria-pressed",cm[k]===val);b.disabled=(k==="useMic"&&srBroken);b.onclick=()=>{cm[k]=val;cmOpts()}})});
+  $("#micNote").textContent=srBroken?srMsg():"Tắt nếu đường quá ồn";
+}
+function cmLoad(off){const list=BANK[state.level];const t=list[(dayIndex()+off)%list.length];cm.off=off;cm.topic=t.topic;cm.items=t.s.map(([en,vi])=>({en,vi}));cm.i=0;cm.scores=[];cm.atResult=false}
+function cmOpen(){
+  ["startView","resultView","lessonView"].forEach(id=>$("#"+id).hidden=true);
+  $("#commuteView").hidden=false;$("#cmSetup").hidden=false;$("#cmPlayer").hidden=true;$("#cmResult").hidden=true;
+  if(srBroken)cm.useMic=false;cmOpts();cmLoad(0);
+}
+function cmClose(){
+  pkOff();cmStop();cm.paused=true;try{keepAlive&&keepAlive.pause()}catch(e){}try{wake&&wake.release()}catch(e){}wake=null;setPS("none");
+  $("#commuteView").hidden=true;$("#startView").hidden=false;renderAll();
+}
+function cmMedia(){
+  if(!("mediaSession" in navigator))return;
+  const h=(a,f)=>{try{navigator.mediaSession.setActionHandler(a,f)}catch(e){}};
+  h("play",()=>{if(cm.atResult)cmNextLesson();else if(cm.paused)cmResume()});
+  h("pause",()=>{if(!cm.paused)cmPause()});
+  h("nexttrack",()=>cm.atResult?cmNextLesson():cmNextS());
+  h("previoustrack",()=>{if(!cm.atResult)cmRepeat()});
+}
+function cmRender(){
+  const it=cm.items[cm.i];
+  $("#cmTitle").textContent=`${state.level} · ${cm.topic} · câu ${Math.min(cm.i+1,cm.items.length)}/${cm.items.length}`;
+  $("#cmDots").innerHTML=cm.items.map((_,k)=>`<i class="${k<cm.i?"done":k===cm.i?"cur":""}"></i>`).join("");
+  $("#cmText").textContent=it&&$("#cmShowText").checked?it.en:"";
+  $("#cmPlay").textContent=cm.paused?"Tiếp tục":"Tạm dừng";
+  if("mediaSession" in navigator&&window.MediaMetadata){try{navigator.mediaSession.metadata=new MediaMetadata({title:it?it.en:cm.topic,artist:"Shadowing · "+cm.topic,album:`Câu ${cm.i+1}/${cm.items.length}`})}catch(e){}}
+}
+async function cmStart(){
+  try{actx=actx||new (window.AudioContext||window.webkitAudioContext)();actx.resume()}catch(e){}
+  if(!keepAlive){keepAlive=new Audio("data:audio/wav;base64,"+silentWav());keepAlive.loop=true}
+  try{await keepAlive.play()}catch(e){}
+  try{if(!wake&&navigator.wakeLock)wake=await navigator.wakeLock.request("screen")}catch(e){}
+  cmMedia();setPS("playing");
+  $("#cmSetup").hidden=true;$("#cmResult").hidden=true;$("#cmPlayer").hidden=false;
+  cmRun();
+}
+async function cmRun(){
+  const tok=++cm.token;cm.paused=false;cm.atResult=false;cmRender();
+  while(cm.i<cm.items.length){
+    const ok=await cmSentence(cm.items[cm.i],tok);
+    if(!ok||tok!==cm.token)return;
+    cm.i++;cmRender();
+  }
+  cmFinish();
+}
+async function cmSentence(it,tok){
+  const alive=()=>tok===cm.token;
+  $("#cmLive").textContent="";
+  cmSet("Nghe");
+  await speak(it.en);if(!alive())return false;
+  if(cm.viMeaning&&it.vi){await sleep(250);if(!alive())return false;cmSet("Nghĩa");await sayVi(it.vi);if(!alive())return false}
+  for(let k=0;k<cm.repeats;k++){
+    await sleep(500);if(!alive())return false;
+    cmSet(`Nói đuổi ${k+1}/${cm.repeats}`);
+    const dur=await speak(it.en);if(!alive())return false;
+    cmSet("Nhắc lại");
+    await sleep(Math.max(1600,(dur||2500)*cm.gap));if(!alive())return false;
+  }
+  if(!cm.useMic)return true;
+  let best=null;
+  for(let attempt=0;attempt<2;attempt++){
+    await cue();if(!alive())return false;
+    cmSet("Đến lượt bạn: nói cả câu");
+    onInterim=t=>{$("#cmLive").textContent=t};
+    let res={text:"",ms:0};
+    try{res=await listenOnce(it.en)}catch(e){
+      if(!alive())return false;
+      if(FATAL.includes(e)){srBroken=true;srReason=e;cm.useMic=false;cmSet("Micro không dùng được, chuyển sang chỉ nghe và nói theo");await speak("Microphone is not available.",1);return true}
+    }
+    if(!alive())return false;
+    const r=align(it.en,res.text);
+    if(!best||r.score>=best.score)best={...r,heard:res.text,ms:res.ms};
+    cmSet(res.text?`${r.score}%`:"Không nghe thấy");
+    if(r.score>=70){await speak(r.score>=90?"Excellent.":"Good.",1);break}
+    if(attempt===0){await speak("Try again.",1);if(!alive())return false;await sleep(200);await speak(it.en);if(!alive())return false}
+    else await speak("Okay. Next one.",1);
+    if(!alive())return false;
+  }
+  cm.scores[cm.i]=best;
+  return true;
+}
+function cmPause(){cmStop();cm.paused=true;try{keepAlive&&keepAlive.pause()}catch(e){}setPS("paused");cmSet("Đã tạm dừng");cmRender()}
+function cmResume(){try{keepAlive&&keepAlive.play()}catch(e){}setPS("playing");cmRun()}
+function cmNextS(){cmStop();if(cm.i<cm.items.length-1){cm.i++;cmResume()}else{cm.i=cm.items.length;cmFinish()}}
+function cmRepeat(){cmStop();cmResume()}
+function cmNextLesson(){cmLoad(cm.off+1);cmStart()}
+async function cmFinish(){
+  cmStop();const tok=cm.token;cm.atResult=true;cm.paused=true;
+  const sc=cm.scores.filter(Boolean);const speakS=sc.length?avg(sc.map(s=>s.score)):null;
+  const wp=sc.map(s=>{const w=norm(s.heard).length;return s.ms>600&&w>1?Math.round(w/(s.ms/60000)):0}).filter(Boolean);
+  const missed=[];cm.items.forEach((it,k)=>{const s=cm.scores[k];if(s&&s.flags)missed.push(...missedWords(it.en,s.flags))});
+  missed.forEach(w=>state.missed[w]=(state.missed[w]||0)+1);
+  state.sessions.push({date:dayKey(),t:Date.now(),level:state.level,topic:cm.topic,listen:null,speak:speakS,wpm:wp.length?avg(wp):0,self:false,mode:"commute"});
+  if(state.sessions.length>400)state.sessions=state.sessions.slice(-400);
+  await save();$("#streakNum").textContent=streak();renderProgress();
+  $("#cmPlayer").hidden=true;const R=$("#cmResult");R.hidden=false;
+  R.innerHTML=`<div class="panel"><h2>Xong bài: ${esc(cm.topic)}</h2>
+    ${speakS!=null?`<div class="score"><b style="color:var(--you)">${speakS}%</b><span class="muted">nghe rồi nhắc lại đúng</span></div>`:`<p class="muted">Đã luyện nghe và nói theo (không chấm điểm).</p>`}
+    ${missed.length?`<p class="small"><b>Từ cần luyện lại:</b></p><div class="words">${[...new Set(missed)].slice(0,12).map(w=>`<span>${esc(w)}</span>`).join("")}</div>`:""}
+    <p class="small muted" style="margin-top:12px">Bấm nút tai nghe để nghe bài tiếp theo.</p>
+    <div class="row" style="margin-top:8px"><button class="btn model" id="cmMore">Nghe bài tiếp theo</button><button class="btn ghost" id="cmDone">Kết thúc</button></div></div>`;
+  $("#cmMore").onclick=cmNextLesson;$("#cmDone").onclick=cmClose;
+  setPS("paused");try{keepAlive&&keepAlive.pause()}catch(e){}
+  if(tok===cm.token)await speak(speakS!=null?`Lesson complete. Your score is ${speakS} percent. Press play for the next lesson.`:"Lesson complete. Press play for the next lesson.",1);
+}
+/* ---------------- Pocket mode ---------------- */
+const PK_HOLD=2000,PK_LEN=282.74;let pkStart=0,pkRaf=0;
+function pkReset(){cancelAnimationFrame(pkRaf);pkStart=0;$("#pkArc").style.strokeDashoffset=PK_LEN}
+function pkOn(){$("#pocket").hidden=false;pkReset();try{const r=document.documentElement.requestFullscreen&&document.documentElement.requestFullscreen();r&&r.catch&&r.catch(()=>{})}catch(e){}}
+function pkOff(){$("#pocket").hidden=true;pkReset();try{if(document.fullscreenElement){const r=document.exitFullscreen();r&&r.catch&&r.catch(()=>{})}}catch(e){}}
+function pkTick(){if(!pkStart)return;const p=Math.min(1,(performance.now()-pkStart)/PK_HOLD);$("#pkArc").style.strokeDashoffset=PK_LEN*(1-p);if(p>=1){pkOff();return}pkRaf=requestAnimationFrame(pkTick)}
+const pkEl=$("#pocket"),pkRing=$("#pkRing");
+["pointerdown","click","dblclick","contextmenu"].forEach(ev=>pkEl.addEventListener(ev,e=>{e.preventDefault();e.stopPropagation()}));
+pkEl.addEventListener("touchmove",e=>e.preventDefault(),{passive:false});
+pkEl.addEventListener("touchstart",e=>{if(e.touches.length>1)pkReset()},{passive:true});
+pkRing.addEventListener("pointerdown",e=>{e.preventDefault();pkStart=performance.now();pkRaf=requestAnimationFrame(pkTick)});
+["pointerup","pointercancel","pointerleave"].forEach(ev=>pkRing.addEventListener(ev,pkReset));
+$("#cmPocket").onclick=pkOn;
+$("#cmGoPocket").onclick=()=>{cmStart();pkOn()};
+
+$("#cmBtn").onclick=cmOpen;
+$("#cmGo").onclick=cmStart;
+$("#cmBack").onclick=cmClose;
+$("#cmExit").onclick=cmClose;
+$("#cmPlay").onclick=()=>cm.paused?cmResume():cmPause();
+$("#cmNext").onclick=cmNextS;
+$("#cmRep").onclick=cmRepeat;
+$("#cmShowText").onchange=cmRender;
+document.addEventListener("visibilitychange",async()=>{if(document.visibilityState==="visible"&&!$("#commuteView").hidden&&!wake&&navigator.wakeLock){try{wake=await navigator.wakeLock.request("screen")}catch(e){}}});
+
+initStorage();
+</script>
+</body>
+</html>
